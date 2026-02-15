@@ -1,11 +1,19 @@
-# セットアップガイド：Macでのシングルセル解析環境の構築
+# セットアップガイド：シングルセル解析環境の構築
 
-このガイドでは、シングルセル解析ワークショップに必要な環境をMac上に構築する手順を説明します。
+このガイドでは、シングルセル解析ワークショップに必要な環境を構築する手順を説明します。**macOS** と **Windows** の両方に対応しています。
 
 ## 1. R と RStudio のインストール
 
-1.  **Rのダウンロード**: [cloud.r-project.org](https://cloud.r-project.org/bin/macosx/) にアクセスし、最新のmacOS版インストーラをダウンロードします（Apple Silicon/M1/M2/M3 か Intel かを確認して適切な方を選んでください）。
+### macOS の場合
+1.  **Rのダウンロード**: [cloud.r-project.org](https://cloud.r-project.org/bin/macosx/) にアクセスし、最新のmacOS版インストーラをダウンロードします（Apple Silicon/M1/M2/M3 か Intel かを確認してください）。
 2.  **RStudio Desktopのダウンロード**: [posit.co/download/rstudio-desktop/](https://posit.co/download/rstudio-desktop/) にアクセスし、無料版（Free version）をインストールします。
+
+### Windows の場合
+1.  **Rのダウンロード**: [cloud.r-project.org](https://cloud.r-project.org/bin/windows/base/) にアクセスし、最新のWindows版をダウンロードします。
+2.  **RStudio Desktopのダウンロード**: [posit.co/download/rstudio-desktop/](https://posit.co/download/rstudio-desktop/) にアクセスし、無料版（Free version）をインストールします。
+3.  **Rtoolsのインストール**: **(Windowsでは必須)**
+    -   Symphonyなどの発展的なパッケージをGitHubからインストールするためにRtoolsが必要です。
+    -   [cloud.r-project.org](https://cloud.r-project.org/bin/windows/Rtools/) から、自身のRのバージョンに合わせたRtools（例：R 4.4.xならRtools44）をダウンロードしてインストールしてください。
 
 ## 2. 必要なRパッケージのインストール
 
@@ -25,7 +33,7 @@ install.packages(c("Seurat", "harmony", "patchwork", "ggplot2", "dplyr", "remote
 ```
 
 ### C. 発展的なマッピング用パッケージ (Symphony & StabMap)
-ワークショップのPart 2で使用します。
+これらのパッケージはワークショップのPart 2で使用します。
 
 **Symphony:**
 ```r
