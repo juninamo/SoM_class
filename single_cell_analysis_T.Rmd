@@ -1,0 +1,275 @@
+---
+title: "はじめてのシングルセル解析：JIA滑膜CITE-seqデータの解析 Part 2"
+subtitle: "サブクラス解析（T細胞のさらなる分類）"
+author: 
+  name: 稲毛 純（Inamo Jun）
+  affiliation: "慶應義塾大学医学部 微生物学・免疫学教室"
+date: "`r format(Sys.time(), '%Y年%m月%d日')`"
+output:
+  BiocStyle::html_document:
+    toc_float: true
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE, 
+  error = FALSE, 
+  message = FALSE, 
+  warning = FALSE,
+  fig.align = "center"
+)
+set.seed(123) # 再現性のためのシード設定
+# パッケージの読み込み
+library(BiocStyle)
+library(Seurat)
+library(magrittr)
+library(patchwork) # グラフを並べるためのパッケージ
+
+```
+
+
+---
+
+# イントロダクション：サブクラス解析の重要性
+
+Part 1では、データセット全体から「T細胞」という大きなグループを特定し、抽出しました。
+しかし、一口にT細胞と言っても、その中には免疫を司令する**ヘルパーT細胞(CD4+)**、攻撃を担う**キラーT細胞(CD8+)**、過剰な免疫を抑える**制御性T細胞(Treg)**など、多様な役割を持つ細胞が混ざっています。
+
+### なぜ再計算が必要なのか？
+
+全体解析で見つかった「高変動遺伝子（Variable Features）」は、T細胞とB細胞やマクロファージを分けるための遺伝子が中心です。
+T細胞の内部にあるわずかな違いを浮き彫りにするためには、**T細胞の中だけで遺伝子のばらつきを計算し直す**必要があります。
+
+---
+
+# データの読み込み
+
+前回保存したT細胞のサブセットデータを読み込みます。
+
+```{r}
+# 保存したRDSファイルを読み込み
+t_cells <- readRDS("./JIAsyno_CITEseq_T_share.rds")
+
+# 読み込んだデータの確認（細胞数やAssayの種類を確認）
+t_cells
+
+```
+
+---
+
+# サブセットに対する再解析パイプライン
+
+T細胞集団に対して、改めて「特徴探し」から「分類」までを行います。
+
+### 1. 高変動遺伝子の再選出
+
+T細胞のサブタイプ（CD4, CD8, Tregなど）を区別するために重要な遺伝子を新たに選びます。
+
+```{r, fig.height=4, fig.width=10}
+# ターゲットをRNAに設定
+DefaultAssay(t_cells) <- "RNA"
+
+# T細胞の中での高変動遺伝子を特定
+t_cells <- FindVariableFeatures(t_cells, selection.method = "vst", nfeatures = 2000)
+
+# 上位の変動遺伝子をプロット
+top10_t <- head(VariableFeatures(t_cells), 10)
+LabelPoints(plot = VariableFeaturePlot(t_cells), points = top10_t, repel = TRUE)
+
+```
+
+### 2. スケーリングとPCA（主成分分析）
+
+T細胞内の差異に基づいた新しい「軸（主成分）」を作成します。
+
+```{r, fig.height=5, fig.width=7}
+t_cells <- ScaleData(t_cells)
+t_cells <- RunPCA(t_cells, features = VariableFeatures(object = t_cells))
+
+# 実際の主成分をプロットして確認
+## ここでの色はT細胞以外の細胞を含めてクラスタリングしたときの情報です
+DimPlot(t_cells, reduction = "pca") + NoLegend()
+
+# どの主成分までが重要か、エルボープロットで確認
+ElbowPlot(t_cells)
+
+```
+
+### 3. クラスタリングとUMAPによる可視化
+
+T細胞の中での「似た者同士」をグループ化します。
+
+```{r, fig.height=5, fig.width=6}
+# PC1から10までを使用して計算
+t_cells <- FindNeighbors(t_cells, dims = 1:10)
+
+# resolution（解像度）を調整することで、クラスターの細かさを変えられます
+# 今回は少し細かめに 0.8 に設定してみます
+t_cells <- FindClusters(t_cells, resolution = 0.8)
+
+# UMAPの計算
+t_cells <- RunUMAP(t_cells, dims = 1:10)
+
+# 結果の描画
+DimPlot(t_cells, reduction = "umap", label = TRUE) 
+
+```
+
+---
+
+# 生物学的な解釈：このT細胞は何者か？
+
+各クラスターがどのようなT細胞なのか、代表的なマーカー遺伝子の発現を見てみましょう。
+
+* **CD4:** ヘルパーT細胞
+* **CD8A:** キラーT細胞
+* **CCR7:** ナイーブT細胞
+* **FOXP3:** 制御性T細胞 (Treg)
+* **KLRB1:** メモリーT細胞のマーカー
+* **TRAV1-2 / SLC4A10:** MAIT細胞
+* **CXCL13:** Follicular helper T細胞 (Tfh)/ Peripheral helper T細胞 (Tph)
+* **NCAM1 / FCGR3A:** NK細胞
+* **GZMB / PRF1:** 細胞傷害活性（キラー能力）を持つ細胞-1
+* **GZMK:** 細胞傷害性T細胞-2
+* **TRDV2 / TRGV9:** γδ T細胞
+* **ZNF683 / KLRC2:** 組織常在性メモリーT細胞 (TRM)
+
+**T細胞アノテーションのコツ**
+まず、T細胞を大きく「CD4陽性」と「CD8陽性」に分け、その後にTregやMAIT、NKTなどの特殊なサブタイプを見ていくと良いでしょう。
+
+**なぜNK細胞のマーカーを見るのか？**
+NK細胞はT細胞と共通の前駆細胞から分化し、かつ遺伝子発現状態が連続的につながっているため、T細胞集団に混入していることがあります。特にCD8陽性T細胞とNK細胞は一部マーカーが重複するため、注意が必要です。
+
+```{r, fig.height=28, fig.width=20}
+# マーカー遺伝子の発現を地図（UMAP）上にプロット
+features_to_plot <- c("CD3E", "CD4", "CD8A", "CCR7", "FOXP3", "KLRB1", 
+                      "TRAV1-2", "SLC4A10", "CXCL13", 
+                      "NCAM1", "FCGR3A", 
+                      "GZMB", "PRF1", "GZMK", 
+                      "TRDV2", "TRGV9", 
+                      "ZNF683", "KLRC2")
+FeaturePlot(t_cells, features = features_to_plot, ncol = 4)
+
+```
+
+### クラスターごとの発現比較（バイオリンプロット）
+
+数値的な違いをより明確に確認します。
+
+```{r, fig.height=36, fig.width=10}
+VlnPlot(t_cells, features = features_to_plot, pt.size = 0, ncol = 2)
+
+```
+
+
+既存のマーカーの発現以外に、データドリブンで各クラスターの特徴的な遺伝子を調べることも有効です。
+
+```{r}
+t_markers = FindAllMarkers(t_cells, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+t_markers %>% 
+  dplyr::group_by(cluster) %>% 
+  dplyr::top_n(n = 8, wt = avg_log2FC) %>%
+  as.data.frame()
+
+```
+
+```{r, fig.height=15, fig.width=10}
+
+DoHeatmap(t_cells, features = t_markers %>% 
+            dplyr::group_by(cluster) %>% 
+            dplyr::top_n(n = 8, wt = avg_log2FC) %>%
+            dplyr::pull(gene) %>%
+            unique()) 
+
+```
+
+---
+
+# クラスターの同定とラベル貼り（実習パート）
+
+解析の結果をもとに、クラスター番号を生物学的な名前に書き換えます。
+
+```{r, fig.height=6, fig.width=7, include = FALSE}
+# 現在のクラスター名を確認
+Idents(t_cells) = t_cells$seurat_clusters
+saveRDS(t_cells,"./JIAsyno_CITEseq_T_share_louvain.rds")
+levels(t_cells)
+
+new_cluster_names <- c(
+  "0"  = "Naive CD4+ T",
+  "1"  = "Memory CD4+ T",
+  "2"  = "Cytotoxic CD8+ T",
+  "3"  = "gamma-delta T",
+  "4"  = "Naive CD8+ T",
+  "5"  = "NK",
+  "6"  = "NK-like T",
+  "7"  = "Memory CD4+ T",
+  "8"  = "Naive CD4+ T",
+  "9"  = "NK",
+  "10" = "Tfh/Tph",
+  "11" = "Treg",
+  "12" = "Cytotoxic CD8+ T",
+  "13" = "NK-like T",
+  "14" = "ILC",         # THEMIS+ IL7R+ ILC
+  "15" = "NK",          # IFNG+ NK
+  "16" = "Cycling T",
+  "17" = "NK"
+)
+
+# SeuratオブジェクトのIdents（クラスター名）を書き換え
+t_cells <- RenameIdents(t_cells, new_cluster_names)
+
+# 書き換えた名前でUMAPを表示
+DimPlot(t_cells, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+
+```
+
+
+論文内のアノテーションとの一致を確認します。
+
+```{r, include = FALSE}
+t_cells_full = readRDS("./JIAsyno_CITEseq_T_full.rds")
+all(rownames(t_cells_full@meta.data)==rownames(t_cells@meta.data))
+prop.table(table(t_cells_full$clusters2312,t_cells$RNA_snn_res.0.8),margin=2)
+
+```
+
+```{r, fig.height=6, fig.width=7, include = FALSE}
+
+# add UMAP dimension
+t_cells_full@reductions$umap = t_cells@reductions$umap
+# add seurat clusters
+t_cells_full$seurat_clusters = t_cells$seurat_clusters
+DimPlot(t_cells_full,group.by="clusters2312",label=T) + NoLegend()
+saveRDS(t_cells_full,"./JIAsyno_CITEseq_T_full_UMAP.rds")
+```
+
+---
+
+# まとめと考察
+
+サブクラス解析を行うことで、全体の解析では一つの「T細胞」という塊だったものが、実は多様な集団の集まりであることが分かりました。
+自己免疫疾患（今回はJIA）の炎症部位において、**「どのT細胞サブセットが特に活性化しているのか」**、あるいは**「治療によってどの集団が減るのか」**を詳細に追跡することが、病態理解の鍵となります。
+
+### 学生への課題
+
+1. `resolution` を 0.2 や 1.5 に変えると、クラスターの数はどう変化しますか？
+
+---
+
+# セッション情報
+
+```{r}
+sessionInfo()
+
+```
+
+
+# 使用したデータセットのサイズ一覧の確認（PCのスペックを指示するのに重要）
+
+```{r}
+# mega biteで表示
+object.size(t_cells) / 1000 / 1000
+```
