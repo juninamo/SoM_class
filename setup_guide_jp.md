@@ -107,12 +107,23 @@ bash Miniforge3-MacOSX-x86_64.sh
 
 以下のコマンドを **1行ずつ** ターミナル (macOS) または Miniforge Prompt (Windows) に入力して実行してください。
 
-### Step A. Conda環境の作成（R 4.3.2 + RStudio）
+### Step A. Conda環境の作成（R 4.3.2）
+
+#### macOS の場合
 
 ```bash
 # scworkshop という名前の環境を作成
 # R 4.3.2 と RStudio を同時にインストールします
 conda create -n scworkshop -c conda-forge r-base=4.3.2 rstudio=2024.04.2 -y
+```
+
+#### Windows の場合
+
+Windows では RStudio を conda でインストールできないため、R のみをインストールします。
+
+```bash
+# scworkshop という名前の環境を作成（R 4.3.2 のみ）
+conda create -n scworkshop -c conda-forge r-base=4.3.2 -y
 ```
 
 > **⏱ 注意：初回のインストールには10〜20分程度かかることがあります。** 途中で止まっているように見えても、そのまま待ってください。
@@ -167,11 +178,11 @@ conda install -c bioconda -c conda-forge \
 
 ---
 
-## 4. RStudio の起動方法
-
-RStudioもcondaでインストール済みなので、ターミナル / Miniforge Prompt から起動します。
+## 4. RStudio のインストールと起動
 
 ### macOS の場合
+
+RStudioはStep Aでcondaと一緒にインストール済みです。ターミナルから起動します：
 
 ```bash
 # 環境を有効化（まだ実行していない場合）
@@ -181,22 +192,38 @@ conda activate scworkshop
 rstudio &
 ```
 
+> **⚠️ 注意（macOS）**：デスクトップにあるRStudioのショートカットからではなく、必ず上記のコマンドで起動してください。
+> コマンドから起動しないと、conda環境のRが使用されない場合があります。
+
 ### Windows の場合
 
-Miniforge Prompt で以下を実行します：
+Windows では RStudio を手動でインストールし、conda環境の R を使用するように設定します。
+
+#### 1. RStudio のインストール
+
+1. [posit.co/download/rstudio-desktop/](https://posit.co/download/rstudio-desktop/) にアクセスします
+2. **無料版（Free version）** の Windows 用インストーラをダウンロードして実行します
+
+#### 2. Conda環境のRのパスを確認
+
+Miniforge Prompt で以下を実行し、Rのパスを確認してください：
 
 ```bash
-# 環境を有効化（まだ実行していない場合）
 conda activate scworkshop
-
-# RStudioを起動
-rstudio
+where R
 ```
 
-> **💡 ヒント**：RStudioが起動したら、コンソール（左下のパネル）に `R version 4.3.2` と表示されていることを確認してください。
+表示されるパスをメモしてください（例：`C:\Users\(ユーザー名)\miniforge3\envs\scworkshop\Scripts\R.exe`）。
 
-> **⚠️ 注意**：デスクトップにあるRStudioのショートカットからではなく、必ず上記のコマンドで起動してください。
-> コマンドから起動しないと、conda環境のRが使用されない場合があります。
+#### 3. RStudioにConda環境のRを設定
+
+1. RStudioを起動します
+2. **Tools → Global Options → General** を開きます
+3. 「**R version**」の横にある **Change...** ボタンをクリックします
+4. 「**Choose a specific version of R**」を選択し、上で確認したパスの R を指定します
+5. **OK** を押して **RStudioを再起動** してください
+
+> **💡 確認**：RStudioが起動したら、コンソール（左下のパネル）に `R version 4.3.2` と表示されていることを確認してください。
 
 ---
 
