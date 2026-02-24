@@ -235,8 +235,15 @@ Miniforge Prompt を開き、**毎回以下の3行を実行**してください�
 ```bash
 conda activate scworkshop
 set RSTUDIO_WHICH_R=%CONDA_PREFIX%\Scripts\R.exe
-rstudio
+"C:\Program Files\RStudio\rstudio.exe"
 ```
+
+> **⚠️ 上記のパスでエラーが出る場合**：RStudio のインストール先が異なる可能性があります。
+> 以下のパスも試してください：
+> ```bash
+> "C:\Program Files\RStudio\bin\rstudio.exe"
+> ```
+> それでも見つからない場合は、スタートメニューで「RStudio」を右クリック →「ファイルの場所を開く」でパスを確認してください。
 
 > **💡 解説**：`RSTUDIO_WHICH_R` は「どの R を使うか」を RStudio に教える環境変数です。
 > この方法で起動すれば、conda 環境の R が自動的に使用されます。
