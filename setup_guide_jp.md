@@ -225,26 +225,37 @@ Windows では RStudio を手動でインストールし、conda環境の R を�
 1. [posit.co/download/rstudio-desktop/](https://posit.co/download/rstudio-desktop/) にアクセスします
 2. **無料版（Free version）** の Windows 用インストーラをダウンロードして実行します
 
-#### 2. Conda環境のRのパスを確認
+#### 2. Miniforge Prompt から RStudio を起動する
 
-Miniforge Prompt で以下を実行し、Rのパスを確認してください：
+conda でインストールした R は Windows のレジストリに登録されないため、RStudio の設定画面（Global Options）からは選択できません。
+代わりに、**Miniforge Prompt から環境変数を設定して RStudio を起動**します。
+
+Miniforge Prompt を開き、**毎回以下の3行を実行**してください：
 
 ```bash
 conda activate scworkshop
-where R
+set RSTUDIO_WHICH_R=%CONDA_PREFIX%\Scripts\R.exe
+rstudio
 ```
 
-表示されるパスをメモしてください（例：`C:\Users\(ユーザー名)\miniforge3\envs\scworkshop\Scripts\R.exe`）。
+> **💡 解説**：`RSTUDIO_WHICH_R` は「どの R を使うか」を RStudio に教える環境変数です。
+> この方法で起動すれば、conda 環境の R が自動的に使用されます。
 
-#### 3. RStudioにConda環境のRを設定
+> **💡 確認**：RStudio が起動したら、コンソール（左下のパネル）に `R version 4.3.2` と表示されていることを確認してください。
 
-1. RStudioを起動します
-2. **Tools → Global Options → General** を開きます
-3. 「**R version**」の横にある **Change...** ボタンをクリックします
-4. 「**Choose a specific version of R**」を選択し、上で確認したパスの R を指定します
-5. **OK** を押して **RStudioを再起動** してください
+> **⚠️ 注意**：デスクトップやスタートメニューの RStudio ショートカットからは起動しないでください。
+> 必ず上記の手順で Miniforge Prompt から起動してください。
 
-> **💡 確認**：RStudioが起動したら、コンソール（左下のパネル）に `R version 4.3.2` と表示されていることを確認してください。
+#### （代替案）RStudioなしでRを直接使う
+
+上記の方法でもうまくいかない場合は、Miniforge Prompt から R を直接起動できます：
+
+```bash
+conda activate scworkshop
+R
+```
+
+R のコンソールが表示されるので、そこにコマンドを直接入力して実行してください。
 
 ---
 
