@@ -128,6 +128,16 @@ conda create -n scworkshop -c conda-forge r-base=4.3.2 -y
 
 > **⏱ 注意：初回のインストールには10〜20分程度かかることがあります。** 途中で止まっているように見えても、そのまま待ってください。
 
+> **⚠️ バージョン指定でエラーが出る場合**：
+> `=4.3.2` や `=2024.04.2` などのバージョン番号を削除して再実行してください。
+> 例：
+> ```bash
+> # macOS（バージョン指定なし）
+> conda create -n scworkshop -c conda-forge r-base rstudio -y
+> # Windows（バージョン指定なし）
+> conda create -n scworkshop -c conda-forge r-base -y
+> ```
+
 ### Step B. 環境の有効化
 
 ```bash
@@ -162,6 +172,12 @@ conda install -c conda-forge \
 > conda install -c conda-forge r-seurat=5.2.1 r-patchwork=1.1.3 r-dplyr=1.1.4 r-magrittr=2.0.3 r-rmarkdown=2.25 r-knitr=1.45 r-bookdown=0.37 -y
 > ```
 
+> **⚠️ バージョン指定でエラーが出る場合**：
+> `=5.2.1` などのバージョン番号をすべて削除して再実行してください。
+> ```bash
+> conda install -c conda-forge r-seurat r-patchwork r-dplyr r-magrittr r-rmarkdown r-knitr r-bookdown -y
+> ```
+
 ### Step D. Bioconductorパッケージのインストール（conda経由）
 
 ```bash
@@ -174,6 +190,11 @@ conda install -c bioconda -c conda-forge \
 > **💡 Windows での1行版**：
 > ```bash
 > conda install -c bioconda -c conda-forge bioconductor-biocstyle=2.30.0 -y
+> ```
+
+> **⚠️ バージョン指定でエラーが出る場合**：
+> ```bash
+> conda install -c bioconda -c conda-forge bioconductor-biocstyle -y
 > ```
 
 ---
