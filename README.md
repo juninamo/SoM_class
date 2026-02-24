@@ -1,3 +1,3 @@
-# SoM_class
+# 慶應医学部免疫学実習
 
-These are data and code for the class of Immunology at Keio University School of Medicine.
+環境のセットアップに関する詳細な説明は[こちら](https://github.com/juninamo/SoM_class/blob/main/setup_guide_jp.md)をご参照ください。
