@@ -270,8 +270,36 @@ R のコンソールが表示されるので、そこにコマンドを直接入
 
 ### A. プロジェクトフォルダの作成
 
-分かりやすい場所（例えばデスクトップ）にプロジェクトフォルダを作成します。
+デスクトップにプロジェクト用のフォルダを作成します。
 
+#### macOS の場合（ターミナル）
+```bash
+# デスクトップへ移動
+cd ~/Desktop
+
+# フォルダの作成
+mkdir SingleCellWorkshop
+cd SingleCellWorkshop
+
+# データ用フォルダの作成
+mkdir data
+```
+
+#### Windows の場合（Miniforge Prompt）
+```bash
+# デスクトップへ移動
+cd %USERPROFILE%\Desktop
+
+# フォルダの作成
+mkdir SingleCellWorkshop
+cd SingleCellWorkshop
+
+# データ用フォルダの作成
+mkdir data
+```
+
+#### フォルダ構成のイメージ
+作成後の構成は以下のようになります：
 ```
 SingleCellWorkshop/
 ├── data/
@@ -374,6 +402,10 @@ R起動後：
 ```r
 # CRANパッケージの場合
 install.packages("パッケージ名")
+
+# バージョンを指定してインストールする場合（例：Seurat 5.2.1）
+install.packages("remotes")
+remotes::install_version("Seurat", version = "5.2.1")
 
 # Bioconductorパッケージの場合
 if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager")
