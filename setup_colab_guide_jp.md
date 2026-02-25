@@ -80,7 +80,7 @@ setup_R_libs_for_students.ipynb        single_cell_analysis_T_colab.ipynb
 
 ### ステップ①：ランタイムを R に設定（初回のみ）
 
-1. ノートブックを Colab で開く
+1. ノートブックを Colab で開く（Google accountはkeio.jpで入る）
 2. メニュー「ランタイム」→「ランタイムのタイプを変更」→ **R** を選択 → 保存
 
 ### ステップ②：2つのファイルをアップロード
