@@ -63,7 +63,8 @@ setup_R_libs_for_students.ipynb        single_cell_analysis_T_colab.ipynb
 
 以下の **3ファイル** を学生に配布してください（メール・Google Drive・GitHub Releases など）。
 
-現時点（2026年2月25日）：講義で使用するデータは学生に事前に[こちら](https://drive.google.com/drive/folders/1ZW-uxlEOZ7xWBXT1D6wTNbN6fYFvRMye?usp=sharing)よりダウンロードしてもらう。
+現時点（2026年2月25日）：講義で使用するデータは学生に**事前**に[こちら](https://drive.google.com/drive/folders/1ZW-uxlEOZ7xWBXT1D6wTNbN6fYFvRMye?usp=sharing)よりダウンロードしてもらう。
+→（**XX月XX日までに3つのファイル全てをダウンロードしてもらうことを学生に周知する**）
 
 | ファイル名 | 内容 |
 |---|---|
@@ -99,7 +100,7 @@ Colab の左サイドバーにある 📁 ファイルアイコンをクリッ�
 `R_libs.zip` を展開して Seurat 等のパッケージを読み込みます。
 
 ```
-✅ セットアップ完了！ Seurat バージョン: x.x.x
+✅ セットアップ完了！ Seurat バージョン: 5.4.0
 ```
 と表示されたら成功です。
 
